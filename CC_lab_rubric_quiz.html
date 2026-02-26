@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kerbala Lab GPS Exam</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+    button { padding: 10px 20px; font-size: 18px; }
+    #status { margin-top: 20px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+<h1>Kerbala University Lab Exam</h1>
+<p>Access is only allowed from the lab location.</p>
+<button onclick="checkLocation()">Start Exam</button>
+<p id="status"></p>
+
+<script>
+// Lab coordinates (replace with your lab GPS coordinates)
+// 32.601489, 44.087547
+
+const labLat = 32.601489; // Lab latitude
+const labLng = 44.087547;  // Lab longitude
+const radiusMeters = 20; // ~20 meters radius
+const examLink = "D1_GOOGLE_FORM_OR_LOCAL_RUBRIC_LINK";
+
+function checkLocation() {
+  if (!navigator.geolocation) {
+    document.getElementById('status').innerText = 'Geolocation is not supported by your browser';
+    return;
+  }
+
+  document.getElementById('status').innerText = 'Checking location...';
+
+  navigator.geolocation.getCurrentPosition(function(position) {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+
+    const distance = getDistanceFromLatLonInMeters(lat, lng, labLat, labLng);
+
+    if (distance <= radiusMeters) {
+      document.getElementById('status').innerText = 'Location verified! Redirecting to exam...';
+      window.location.href = examLink;
+    } else {
+      document.getElementById('status').innerText = 'Access denied: You must be in the lab to take this exam';
+    }
+
+  }, function(error) {
+    document.getElementById('status').innerText = 'Unable to get location. Please enable GPS.';
+  });
+}
+
+// Haversine formula to calculate distance between two lat/lng points
+function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371000; // Radius of the earth in meters
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a =
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const d = R * c;
+  return d;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI/180);
+}
+</script>
+
+</body>
+</html>
